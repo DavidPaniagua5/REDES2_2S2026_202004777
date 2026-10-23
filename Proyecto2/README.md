@@ -136,3 +136,152 @@ Servidor DHCP: `172.16.27.130/27`, gateway `172.16.27.129`.
 **Causa:** DIST2 mantenía en bloqueo STP el Po1 (los hellos de HSRP no cruzaban entre los DIST). Era un estado atascado de convergencia, ya que el trunk y las VLANs estaban correctos.
 
 **Solución:** reinicio del Po1 en ambos DIST (`shutdown` / `no shutdown` del port-channel y de sus interfaces físicas). Tras ~1 minuto, HSRP formó el par y STP convergió.
+
+```a
+enable
+configure terminal
+hostname FNET-CORE
+no ip domain-lookup
+ip routing
+interface gigabitEthernet 1/0/1
+ description A-FNET-R1
+ no switchport
+ ip address 192.168.77.33 255.255.255.252
+ no shutdown
+interface gigabitEthernet 1/1/1
+ description FIBRA-BGP-ANDINACOM
+ no switchport
+ ip address 192.168.77.1 255.255.255.252
+ no shutdown
+interface gigabitEthernet 1/1/2
+ description FIBRA-BGP-MOONLINK
+ no switchport
+ ip address 192.168.77.10 255.255.255.252
+ no shutdown
+ip route 172.16.17.0 255.255.255.0 null0
+router ospf 1
+ router-id 1.1.1.1
+ network 192.168.77.32 0.0.0.31 area 0
+ default-information originate always
+router bgp 65017
+ bgp router-id 1.1.1.1
+ neighbor 192.168.77.2 remote-as 65027
+ neighbor 192.168.77.9 remote-as 65032
+ network 172.16.17.0 mask 255.255.255.0
+end
+write memory
+```
+
+R1
+
+```cisco
+enable
+configure terminal
+hostname FNET-R1
+no ip domain-lookup
+interface gigabitEthernet 0/0
+ ip address 192.168.77.34 255.255.255.252
+ no shutdown
+interface gigabitEthernet 0/1
+ ip address 192.168.77.37 255.255.255.252
+ no shutdown
+interface gigabitEthernet 0/2
+ ip address 192.168.77.41 255.255.255.252
+ no shutdown
+router ospf 1
+ router-id 1.1.1.2
+ network 192.168.77.32 0.0.0.31 area 0
+end
+write memory
+```
+
+R2 y R3
+
+```cisco
+hostname FNET-R2
+interface gigabitEthernet 0/0
+ ip address 192.168.77.38 255.255.255.252
+ no shutdown
+interface gigabitEthernet 0/1
+ ip address 192.168.77.45 255.255.255.252
+ no shutdown
+router ospf 1
+ router-id 1.1.1.3 
+ network 192.168.77.32 0.0.0.31 area 0
+
+hostname FNET-R2     
+interface gigabitEthernet 0/0
+ ip address 192.168.77.42 255.255.255.252 
+ no shutdown
+interface gigabitEthernet 0/1
+ ip address 192.168.77.49 255.255.255.252 
+ no shutdown
+router ospf 1
+ router-id 1.1.1.4 
+ network 192.168.77.32 0.0.0.31 area 0
+```
+
+R4
+
+```cisco
+hostname FNET-R4
+interface gigabitEthernet 0/0
+ ip address 192.168.77.46 255.255.255.252
+ no shutdown
+interface gigabitEthernet 0/1
+ description LAN-ADMINISTRACION
+ ip address 172.16.17.1 255.255.255.128
+ ip helper-address 172.16.27.130
+ no shutdown
+router ospf 1
+ router-id 1.1.1.5
+ network 192.168.77.32 0.0.0.31 area 0
+ network 172.16.17.0 0.0.0.127 area 0
+ passive-interface gigabitEthernet 0/1
+```
+
+R5
+
+```cisco
+hostname FNET-R5
+interface gigabitEthernet 0/0
+ ip address 192.168.77.50 255.255.255.252
+ no shutdown
+interface gigabitEthernet 0/1
+ description LAN-ATENCION
+ ip address 172.16.17.129 255.255.255.128
+ ip helper-address 172.16.27.130
+ no shutdown
+router ospf 1
+ router-id 1.1.1.6
+ network 192.168.77.32 0.0.0.31 area 0
+ network 172.16.17.128 0.0.0.127 area 0
+ passive-interface gigabitEthernet 0/1
+```
+
+Switchs de acceso (2960)
+
+```cisco
+enable
+configure terminal
+hostname FIB-SW-ADM1                  ! ADM2, ATC1, ATC2 según corresponda
+interface range gigabitEthernet 0/1 - 2
+ channel-protocol lacp
+ channel-group 1 mode active
+ no shutdown
+end
+write memory
+````
+
+```cisco
+enable
+configure terminal
+hostname FIB-SW-ADM1                  ! ADM2, ATC1, ATC2 según corresponda
+no ip domain-lookup
+interface range fastEthernet 0/23 - 24
+ channel-protocol lacp
+ channel-group 1 mode active
+ no shutdown
+end
+write memory
+```
