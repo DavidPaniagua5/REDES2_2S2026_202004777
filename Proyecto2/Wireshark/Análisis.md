@@ -96,7 +96,7 @@ Tiempo entre SYN y SYN-ACK: **≈ 41.8 ms** (RTT hacia el servidor). El handshak
 **Frames en el archivo final:** 120–123
 **Filtro:** `dns`
 
-![Captura DNS](img/W2.png)
+![Captura DNS](../docs/img/W2.png)
 
 ### Intercambio
 
@@ -143,9 +143,9 @@ Cuando `curl` resuelve `example.com` (frames 1-4), consulta a `10.0.2.3`, el DNS
 
 **Comando:** `curl http://example.com` · **Frames:** 126-136 · **Filtro:** `http`
 
-![Lista de paquetes HTTP](img/W3.png)
-![Filtro http](img/W3-1.png)
-![Detalle de la respuesta HTTP](img/W3-2.png)
+![Lista de paquetes HTTP](../docs/img/W3.png)
+![Filtro http](../docs/img/W3-1.png)
+![Detalle de la respuesta HTTP](../docs/img/W3-2.png)
 
 | Frame | Tiempo (s) | Descripción |
 |---|---|---|
@@ -171,8 +171,8 @@ El **tiempo de respuesta HTTP** (GET → 200 OK) es de **≈ 55 ms**.
 
 **Comando:** `curl https://example.com` - **Frames:** 137-161 - **Filtro:** `tls`
 
-![Captura HTTPS](img/W3-3.png)
-![Filtro tls](img/W3-4.png)
+![Captura HTTPS](../docs/img/W3-3.png)
+![Filtro tls](../docs/img/W3-4.png)
 
 **Secuencia (conexión `10.0.2.15:47734` → `104.20.23.154:443`):**
 
@@ -219,7 +219,7 @@ El **tiempo de respuesta HTTP** (GET → 200 OK) es de **≈ 55 ms**.
 **Frames:** 162–169
 **Filtro:** `icmp`
 
-![Captura ICMP](img/W4.png)
+![Captura ICMP](../docs/img/W4.png)
 
 | Seq | Request (frame / t) | Reply (frame / t) | RTT | TTL request | TTL reply |
 |---|---|---|---|---|---|
